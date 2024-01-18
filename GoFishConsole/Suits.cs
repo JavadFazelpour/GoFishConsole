@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GoFishConsole
 {
-    enum Suits
+    public enum Suits
     {
         Clubs,
         Diamonds,

@@ -6,18 +6,17 @@ using System.Threading.Tasks;
 
 namespace GoFishConsole
 {
-    class Player
+    public class Player
     {
         public static Random random = new Random();
 
         private List<Card> hand = new List<Card>();
-        private List<Values> books = new List<Values>();
-
         /// <summary>
         /// The cards in the player's hand.
         /// </summary>
         public IEnumerable<Card> Hand => hand;
 
+        private List<Values> books = new List<Values>();
         /// <summary>
         /// The books that player has pulled out.
         /// </summary>

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GoFishConsole
 {
-    internal class Card
+    public class Card
     {
         public Values Value { get; set; }
         public Suits Suit { get; set; }

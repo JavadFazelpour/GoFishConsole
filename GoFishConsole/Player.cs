@@ -8,7 +8,7 @@ namespace GoFishConsole
 {
     public class Player
     {
-        public static Random random = new Random();
+        public static Random Random = new Random();
 
         private List<Card> hand = new List<Card>();
         /// <summary>
@@ -23,19 +23,6 @@ namespace GoFishConsole
         public IEnumerable<Values> Books => books;
 
         public readonly string Name;
-
-        /// <summary>
-        /// Pluralize a word, adding "s" if a value isn't equal to 1
-        /// </summary>
-        /// <param name="s"></param>
-        /// <returns>returns "s" to make a word plural if input parameter is greater than 1.</returns>
-        public static string S(int s) => s == 1 ? "" : "s";
-
-        /// <summary>
-        /// Returns the current status of the player: the number of cards and books.
-        /// </summary>
-        public string Status => throw new NotImplementedException();
-
         /// <summary>
         /// Constructor to create a player.
         /// </summary>
@@ -54,12 +41,29 @@ namespace GoFishConsole
         }
 
         /// <summary>
+        /// Pluralize a word, adding "s" if a value isn't equal to 1
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns>returns "s" to make a word plural if input parameter is greater than 1.</returns>
+        public static string S(int s) => s == 1 ? "" : "s";
+
+        /// <summary>
+        /// Returns the current status of the player: the number of cards and books.
+        /// </summary>
+        public string Status =>
+            $"{Name} has {Hand.Count()} card{S(Hand.Count())} and {Books.Count()} book{S(Books.Count())}";
+
+
+        /// <summary>
         /// Gets up to five cards from the stock
         /// </summary>
         /// <param name="stock">Stock to get the next hand from</param>        
         public void GetNextHand(Deck stock)
         {
-            throw new NotImplementedException();
+            while (stock.Count > 0 && hand.Count < 5)
+            {
+                hand.Add(stock.Deal(0));
+            }
         }
 
         /// <summary>
@@ -71,7 +75,18 @@ namespace GoFishConsole
         /// <returns>The cards that were pulled out of the other player's hand</returns>        
         public IEnumerable<Card> DoYouHaveAny(Values value, Deck deck)
         {
-            throw new NotImplementedException();
+            var matchingCards = from card in hand
+                                where card.Value == value
+                                orderby card.Suit
+                                select card;
+
+            hand = (from card in hand
+                    where card.Value != value
+                    select card).ToList();
+
+            if (hand.Count() == 0) GetNextHand(deck);
+
+            return matchingCards;
         }
 
         /// <summary>
@@ -81,7 +96,18 @@ namespace GoFishConsole
         /// <param name="cards">Cards from the other player to add</param>        
         public void AddCardsAndPullOutBooks(IEnumerable<Card> cards)
         {
-            throw new NotImplementedException();
+            hand.AddRange(cards);
+            var matchingCards = hand
+                .GroupBy(card => card.Value)
+                .Where(group => group.Count() == 4)
+                .Select(group => group.Key);
+
+            books.AddRange(matchingCards);
+            books.Sort();
+
+            hand = hand
+                .Where(card => !books.Contains(card.Value))
+                .ToList();
         }
 
         /// <summary>
@@ -90,14 +116,19 @@ namespace GoFishConsole
         /// <param name="stock">Stock to draw a card from</param>        
         public void DrawCard(Deck stock)
         {
-            throw new NotImplementedException();
+            if (stock.Count > 0)
+                AddCardsAndPullOutBooks(new List<Card> { stock.Deal(0) });
         }
 
         /// <summary>
         /// Gets a random value from the player's hand
         /// </summary>
         /// <returns>the value of a randomly selected card in the player's hand</returns>        
-        public Values RandomValuesFromHand() => throw new NotImplementedException();
+        public Values RandomValuesFromHand() => hand.OrderBy(card=>card.Value)
+            .Select(card=>card.Value)
+            .Skip(Random.Next(hand.Count()))
+            .First();
+
         public override string ToString() => Name;
     }
 }

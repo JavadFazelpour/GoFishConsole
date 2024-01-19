@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace GoFishConsole
 {
-    class Deck : ObservableCollection<Card>
+    public class Deck : List<Card>
     {
         //you should only have a single instance of Random, so deck class uses the Player class Random instance.
-        private static Random random = Player.random;
+        private static Random random = Player.Random;
         public Deck() { Reset(); }
         public Card Deal(int index)
         {
@@ -23,7 +23,7 @@ namespace GoFishConsole
             Clear();
 
             for (int suit = 0; suit < 4; suit++)
-                for (int value = 0; value < 14; value++)
+                for (int value = 1; value < 14; value++)
                     Add(new Card((Values)value, (Suits)suit));
         }
 

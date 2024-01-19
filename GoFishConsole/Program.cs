@@ -4,7 +4,9 @@
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            var stock = new Deck();
+            var player = new Player("Owen");
+            player.DrawCard(stock);
         }
     }
 }

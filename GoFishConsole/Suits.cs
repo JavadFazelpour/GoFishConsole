@@ -8,8 +8,8 @@ namespace GoFishConsole
 {
     public enum Suits
     {
-        Clubs,
         Diamonds,
+        Clubs,
         Hearts,
         Spades,
     }

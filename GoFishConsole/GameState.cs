@@ -24,7 +24,20 @@ namespace GoFishConsole
         /// <exception cref="NotImplementedException"></exception>
         public GameState(string humanPlayerName, IEnumerable<string> opponentsNames, Deck stock)
         {
-            throw new NotImplementedException();
+            this.Stock = stock;
+
+            HumanPlayer = new Player(humanPlayerName);
+            HumanPlayer.GetNextHand(Stock);
+
+            var opponents = new List<Player>();
+            foreach (string name in opponentsNames)
+            {
+                var player = new Player(name);
+                player.GetNextHand(Stock);
+                opponents.Add(player);
+            }
+            Opponents = opponents;
+            Players = new List<Player>() { HumanPlayer }.Concat(Opponents);
         }
 
         /// <summary>
@@ -33,7 +46,10 @@ namespace GoFishConsole
         /// <param name="currentPlayer">The current player</param>
         /// <returns>A random player that the current player can ask for a card</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Player RandomPlayer(Player currentPlayer) => throw new NotImplementedException();
+        public Player RandomPlayer(Player currentPlayer) =>
+            Players.Where(player => player != currentPlayer)
+                   .Skip(Player.Random.Next(Players.Count() - 1))
+                   .First();
 
         /// <summary>
         /// Makes one player play a round
@@ -47,7 +63,30 @@ namespace GoFishConsole
         public string PlayRound(Player player, Player playerToAsk,
             Values valueToAskFor, Deck stock)
         {
-            throw new NotImplementedException();
+            var valuePlural = (valueToAskFor == Values.Six) ? "Sixes" : $"{valueToAskFor}s";
+            var message = $"{player.Name} asked {playerToAsk.Name}" +
+                $" for {valuePlural}{Environment.NewLine}";
+            var cards = playerToAsk.DoYouHaveAny(valueToAskFor, stock);
+            if (cards.Count() > 0)
+            {
+                player.AddCardsAndPullOutBooks(cards);
+                message += $"{playerToAsk.Name} has {cards.Count()}" +
+                    $" {valueToAskFor} card{Player.S(cards.Count())}";
+            }
+            else if (stock.Count == 0)
+                message += $"The stock is out of cards";
+            else
+            {
+                player.DrawCard(stock);
+                message += $"{player.Name} drew a card.";
+            }
+            if (player.Hand.Count()==0)
+            {
+                player.GetNextHand(stock);
+                message += $"{Environment.NewLine}{player.Name} ran out of cards," +
+                    $" drew {player.Hand.Count()} from the stock.";
+            }
+            return message;
         }
 
         /// <summary>
@@ -58,7 +97,13 @@ namespace GoFishConsole
         /// <exception cref="NotImplementedException"></exception>
         public string CheckForWinner()
         {
-            throw new NotImplementedException();
+            var playerCards = Players.Select(player => player.Hand.Count()).Sum();
+            if (playerCards > 0) return"";
+            GameOver = true;
+            var winnighBookCount = Players.Select(player => player.Books.Count()).Max();
+            var winners = Players.Where(player => player.Books.Count() == winnighBookCount);
+            if (winners.Count() == 1) return $"The winner is {winners.First().Name}";
+            return $"The winners are {string.Join(" and ", winners)}";
         }
     }
 }
